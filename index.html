@@ -12,16 +12,16 @@
     <meta name="application-name" content="Reading Log">
     <meta name="msapplication-TileColor" content="#0d9488">
     <meta name="msapplication-tap-highlight" content="no">
-    <link rel="manifest" href='data:application/json;charset=utf-8,%7B%22name%22%3A%22My%20Reading%20Log%22%2C%22short_name%22%3A%22Reading%20Log%22%2C%22description%22%3A%22Track%20your%20reading%20journey%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22display_override%22%3A%5B%22standalone%22%2C%22minimal-ui%22%5D%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23fffbeb%22%2C%22theme_color%22%3A%22%230d9488%22%2C%22categories%22%3A%5B%22education%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Ctext%2520y%3D%27.9em%27%2520font-size%3D%2790%27%253E%25F0%259F%2593%259A%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D'>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="manifest" href='data:application/json;charset=utf-8,%7B%22name%22%3A%22My%20Reading%20Log%22%2C%22short_name%22%3A%22Reading%20Log%22%2C%22description%22%3A%22Track%20your%20reading%20journey%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22id%22%3A%22reading-log-pwa%22%2C%22display%22%3A%22standalone%22%2C%22display_override%22%3A%5B%22standalone%22%2C%22minimal-ui%22%5D%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23fffbeb%22%2C%22theme_color%22%3A%22%230d9488%22%2C%22categories%22%3A%5B%22education%22%2C%22productivity%22%5D%2C%22prefer_related_applications%22%3Afalse%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fwww.chijsttheresasconvent.moe.edu.sg%2Fimages%2Flogo.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fwww.chijsttheresasconvent.moe.edu.sg%2Fimages%2Flogo.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fwww.chijsttheresasconvent.moe.edu.sg%2Fimages%2Flogo.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22maskable%22%7D%5D%2C%22screenshots%22%3A%5B%5D%2C%22shortcuts%22%3A%5B%7B%22name%22%3A%22Add%20Reading%22%2C%22short_name%22%3A%22Add%22%2C%22description%22%3A%22Log%20a%20new%20reading%20session%22%2C%22url%22%3A%22.%22%7D%5D%7D'>
+    <link rel="icon" href="https://www.chijsttheresasconvent.moe.edu.sg/images/logo.png">
+    <link rel="apple-touch-icon" href="https://www.chijsttheresasconvent.moe.edu.sg/images/logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-        html, body { height: 100%; overflow: hidden; }
+        html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
         body {
             font-family: 'Nunito', sans-serif;
             -webkit-tap-highlight-color: transparent;
@@ -33,13 +33,18 @@
             padding-right: env(safe-area-inset-right);
         }
         #root { height: 100%; overflow: hidden; }
+        .app-container { height: 100%; display: flex; flex-direction: column; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         input[type="range"] { -webkit-appearance: none; background: transparent; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #0d9488; cursor: pointer; margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
         input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
         .animate-in { animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .main-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .main-content { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; min-height: 0; }
+        /* Font size classes */
+        .font-size-small { font-size: 14px; }
+        .font-size-medium { font-size: 16px; }
+        .font-size-large { font-size: 18px; }
 
         /* Dark mode support */
         .dark body { background-color: #1a1a2e; color: #e2e8f0; }
@@ -130,12 +135,12 @@
             ];
 
             var READING_TYPES = [
-                { id: 'independent', name: 'Independent', icon: '📖' },
-                { id: 'bookclub', name: 'Book Club', icon: '📚' },
+                { id: 'morning', name: 'Morning Assembly', icon: '🌅' },
+                { id: 'schoollib', name: 'School Library', icon: '🏫' },
+                { id: 'nationallib', name: 'National Library', icon: '🏛️' },
+                { id: 'libby', name: 'Libby', icon: '📱' },
                 { id: 'audiobook', name: 'Audiobook', icon: '🎧' },
-                { id: 'response', name: 'Response', icon: '📝' },
-                { id: 'guided', name: 'Guided', icon: '🏫' },
-                { id: 'freechoice', name: 'Free Choice', icon: '🎉' }
+                { id: 'freetime', name: 'Free Time', icon: '🎉' }
             ];
 
             var GENRES = [
@@ -297,7 +302,7 @@
                 var setStatusMsg = statusState[1];
 
                 var newLogState = useState({
-                    type: 'independent',
+                    type: 'morning',
                     genre: 'fiction',
                     bookTitle: '',
                     duration: '',
@@ -419,12 +424,9 @@
                     safeStorage.setItem(STORAGE_KEY_BOOKS, JSON.stringify(completedBooks));
                 }, [completedBooks]);
 
-                // Save and apply settings
+                // Save settings
                 useEffect(function() {
                     safeStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(appSettings));
-                    // Apply font size
-                    var fontSetting = FONT_SIZES.find(function(f) { return f.id === appSettings.fontSize; }) || FONT_SIZES[1];
-                    document.documentElement.style.fontSize = (fontSetting.scale * 16) + 'px';
                 }, [appSettings]);
 
                 function notify(msg) {
@@ -1336,7 +1338,7 @@
                 }
 
                 function renderProfile() {
-                    return h('div', { className: "space-y-5 animate-in pb-4 overflow-y-auto" },
+                    return h('div', { className: "space-y-5 animate-in pb-8" },
                         h('section', { className: "space-y-3" },
                             h('h2', { className: "text-sm font-black px-1 uppercase tracking-wider text-slate-500 dark:text-slate-400" }, "Reader Profile"),
                             h('div', { className: "bg-white dark:bg-slate-800 p-5 rounded-2xl border dark:border-slate-700 space-y-4 shadow-sm" },
@@ -1655,10 +1657,16 @@
                     );
                 }
 
-                return h('div', { className: "min-h-screen bg-amber-50 dark:bg-slate-900 flex flex-col max-w-md mx-auto relative overflow-x-hidden" },
-                    h('header', { className: "bg-white dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-3 sticky top-0 z-50 flex items-center justify-between flex-shrink-0" },
+                var fontSizeClass = 'font-size-' + (appSettings.fontSize || 'medium');
+
+                return h('div', { className: "app-container bg-amber-50 dark:bg-slate-900 max-w-md mx-auto relative " + fontSizeClass },
+                    h('header', { className: "bg-white dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-3 flex items-center justify-between flex-shrink-0" },
                         h('div', { className: "flex items-center gap-2" },
-                            h('span', { className: "text-xl" }, "📚"),
+                            h('img', {
+                                src: "https://www.chijsttheresasconvent.moe.edu.sg/images/logo.png",
+                                alt: "School Logo",
+                                className: "w-8 h-auto"
+                            }),
                             h('h1', { className: "font-extrabold text-teal-600 text-sm tracking-tight" }, "MY READING LOG")
                         ),
                         statusMsg && h('span', { className: "text-[9px] font-bold uppercase text-teal-600 animate-pulse text-right max-w-[150px] leading-tight" }, statusMsg)
@@ -1685,7 +1693,7 @@
                             }, "Install")
                         )
                     ),
-                    h('main', { className: "main-content flex-1 p-4 space-y-5 pb-28" },
+                    h('main', { className: "main-content flex-1 p-4 space-y-5 pb-24" },
                         activeTab === 'dashboard' && renderDashboard(),
                         activeTab === 'history' && renderHistory(),
                         activeTab === 'books' && renderBooks(),
@@ -1694,7 +1702,7 @@
                         activeTab === 'profile' && renderProfile()
                     ),
                     h('nav', {
-                        className: "fixed bottom-5 left-4 right-4 max-w-md mx-auto bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border dark:border-slate-700 rounded-2xl px-1 py-1.5 flex items-center shadow-lg z-[60]",
+                        className: "fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(28rem-2rem)] bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border dark:border-slate-700 rounded-2xl px-1 py-1.5 flex items-center shadow-lg z-[60]",
                         style: { marginBottom: 'env(safe-area-inset-bottom)' }
                     },
                         h('div', { className: "flex-1 flex justify-evenly" },
@@ -1723,7 +1731,11 @@
                     showSplash && h('div', {
                         className: "fixed inset-0 z-[300] flex flex-col items-center justify-center bg-amber-50 dark:bg-slate-900"
                     },
-                        h('span', { className: "text-6xl mb-4" }, "📚"),
+                        h('img', {
+                            src: "https://www.chijsttheresasconvent.moe.edu.sg/images/logo.png",
+                            alt: "School Logo",
+                            className: "w-28 h-auto mb-4 drop-shadow-lg"
+                        }),
                         h('h1', { className: "text-xl font-extrabold text-teal-600 tracking-tight text-center" }, "MY READING LOG"),
                         h('p', { className: "text-xs text-slate-500 dark:text-slate-400 mt-2 italic" }, "Track your reading journey"),
                         h('p', { className: "text-[10px] text-slate-400 dark:text-slate-500 mt-4 uppercase tracking-widest" }, "Loading...")
