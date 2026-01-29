@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Reading Log</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Reading Log">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0d9488">
+    <meta name="application-name" content="Reading Log">
+    <meta name="msapplication-TileColor" content="#0d9488">
+    <meta name="msapplication-tap-highlight" content="no">
+    <link rel="manifest" href='data:application/json;charset=utf-8,%7B%22name%22%3A%22My%20Reading%20Log%22%2C%22short_name%22%3A%22Reading%20Log%22%2C%22description%22%3A%22Track%20your%20reading%20journey%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22display_override%22%3A%5B%22standalone%22%2C%22minimal-ui%22%5D%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23fffbeb%22%2C%22theme_color%22%3A%22%230d9488%22%2C%22categories%22%3A%5B%22education%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Ctext%2520y%3D%27.9em%27%2520font-size%3D%2790%27%253E%25F0%259F%2593%259A%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D'>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        #root { height: 100%; overflow: hidden; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        input[type="range"] { -webkit-appearance: none; background: transparent; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #0d9488; cursor: pointer; margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
+        .animate-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .main-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+        /* Dark mode support */
+        .dark body { background-color: #1a1a2e; color: #e2e8f0; }
+        .dark .bg-amber-50 { background-color: #2d2a1e; }
+        .dark .bg-white { background-color: #252540; }
+        .dark .bg-slate-50 { background-color: #1a1a2e; }
+        .dark .text-slate-900 { color: #e2e8f0; }
+        .dark .text-slate-700 { color: #cbd5e1; }
+        .dark .text-slate-500 { color: #94a3b8; }
+        .dark .text-slate-400 { color: #64748b; }
+        .dark .text-slate-300 { color: #475569; }
+        .dark .border { border-color: #3f3f5a; }
+        .dark .border-b { border-color: #3f3f5a; }
+        .dark .ring-slate-100 { --tw-ring-color: #3f3f5a; }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-900">
+    <div id="root"></div>
+    <script>
+        (function() {
+            var h = React.createElement;
+            var useState = React.useState;
+            var useMemo = React.useMemo;
+            var useEffect = React.useEffect;
+            var useRef = React.useRef;
+
+            // Dark mode detection
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(event) {
+                if (event.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            });
+
+            // Safe storage wrapper for iframe/PWA compatibility
+            var storageKey = 'localStorage';
+            var safeStorage = {
+                _cache: {},
+                getItem: function(key) {
+                    try {
+                        var store = window[storageKey];
+                        return store ? store.getItem(key) : this._cache[key] || null;
+                    } catch (e) {
+                        return this._cache[key] || null;
+                    }
+                },
+                setItem: function(key, value) {
+                    try {
+                        var store = window[storageKey];
+                        if (store) store.setItem(key, value);
+                        this._cache[key] = value;
+                    } catch (e) {
+                        this._cache[key] = value;
+                    }
+                }
+            };
+
+            var STORAGE_KEY_LOGS = "reading_log_entries_v1";
+            var STORAGE_KEY_PROFILE = "reading_log_profile_v1";
+            var STORAGE_KEY_BOOKS = "reading_log_books_v1";
+
+            // Reader type definitions
+            var READER_TYPES = [
+                { id: 'bookworm', name: 'Bookworm', emoji: '🐛', desc: 'You read every day!', check: function(s) { return s.streak >= 7; } },
+                { id: 'speedreader', name: 'Speed Reader', emoji: '⚡', desc: 'Lightning fast pages!', check: function(s) { return s.avgPages >= 30; } },
+                { id: 'marathoner', name: 'Marathon Reader', emoji: '🏃', desc: 'Long reading sessions!', check: function(s) { return s.avgMins >= 45; } },
+                { id: 'explorer', name: 'Genre Explorer', emoji: '🧭', desc: 'You love variety!', check: function(s) { return s.genreCount >= 4; } },
+                { id: 'fantasyfan', name: 'Fantasy Fan', emoji: '🧙', desc: 'Magic is your thing!', check: function(s) { return s.topGenre === 'fantasy'; } },
+                { id: 'factfinder', name: 'Fact Finder', emoji: '🔍', desc: 'Non-fiction lover!', check: function(s) { return s.topGenre === 'nonfiction'; } },
+                { id: 'mysterysolver', name: 'Mystery Solver', emoji: '🕵️', desc: 'Case closed!', check: function(s) { return s.topGenre === 'mystery'; } },
+                { id: 'scifidreamer', name: 'Sci-Fi Dreamer', emoji: '🚀', desc: 'Future thinker!', check: function(s) { return s.topGenre === 'scifi'; } },
+                { id: 'adventurer', name: 'Adventurer', emoji: '🗺️', desc: 'Thrill seeker!', check: function(s) { return s.topGenre === 'adventure'; } },
+                { id: 'storyteller', name: 'Story Lover', emoji: '📖', desc: 'Fiction is your friend!', check: function(s) { return s.topGenre === 'fiction'; } },
+                { id: 'historian', name: 'Time Traveler', emoji: '⏳', desc: 'History buff!', check: function(s) { return s.topGenre === 'historical'; } },
+                { id: 'rising', name: 'Rising Reader', emoji: '🌱', desc: 'Building great habits!', check: function(s) { return s.totalSessions >= 1; } },
+                { id: 'newbie', name: 'New Reader', emoji: '✨', desc: 'Start your journey!', check: function() { return true; } }
+            ];
+
+            var READING_TYPES = [
+                { id: 'independent', name: 'Independent', icon: '📖' },
+                { id: 'bookclub', name: 'Book Club', icon: '📚' },
+                { id: 'audiobook', name: 'Audiobook', icon: '🎧' },
+                { id: 'response', name: 'Response', icon: '📝' },
+                { id: 'guided', name: 'Guided', icon: '🏫' },
+                { id: 'freechoice', name: 'Free Choice', icon: '🎉' }
+            ];
+
+            var GENRES = [
+                { id: 'fiction', name: 'Fiction' },
+                { id: 'nonfiction', name: 'Non-Fiction' },
+                { id: 'fantasy', name: 'Fantasy' },
+                { id: 'mystery', name: 'Mystery / Thriller' },
+                { id: 'scifi', name: 'Science Fiction' },
+                { id: 'biography', name: 'Biography / Memoir' },
+                { id: 'historical', name: 'Historical Fiction' },
+                { id: 'poetry', name: 'Poetry' },
+                { id: 'graphic', name: 'Graphic Novel / Comics' },
+                { id: 'horror', name: 'Horror' },
+                { id: 'adventure', name: 'Adventure' },
+                { id: 'romance', name: 'Romance' },
+                { id: 'selfhelp', name: 'Self-Help' },
+                { id: 'other', name: 'Other' }
+            ];
+
+            var DIFFICULTY_LEVELS = [
+                { id: 'easy', name: 'Easy' },
+                { id: 'justright', name: 'Just Right' },
+                { id: 'challenging', name: 'Challenging' }
+            ];
+
+            function getWeekIdentifier(date) {
+                var d = new Date(date);
+                var day = d.getDay();
+                var diff = d.getDate() - day + (day === 0 ? -6 : 1);
+                return new Date(d.setDate(diff)).toISOString().split('T')[0];
+            }
+
+            function Icon(props) {
+                var name = props.name;
+                var className = props.className || "w-4 h-4";
+                var svgState = useState('');
+                var svg = svgState[0];
+                var setSvg = svgState[1];
+
+                useEffect(function() {
+                    var icon = lucide.icons[name];
+                    if (icon) {
+                        var svgString = icon.map(function(tag) {
+                            var tagName = tag[0];
+                            var attrs = tag[1];
+                            var attrString = Object.entries(attrs).map(function(kv) {
+                                return kv[0] + '="' + kv[1] + '"';
+                            }).join(' ');
+                            return '<' + tagName + ' ' + attrString + '></' + tagName + '>';
+                        }).join('');
+                        setSvg(svgString);
+                    }
+                }, [name]);
+
+                return h('svg', {
+                    xmlns: "http://www.w3.org/2000/svg",
+                    viewBox: "0 0 24 24",
+                    fill: "none",
+                    stroke: "currentColor",
+                    strokeWidth: "2.5",
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    className: className,
+                    dangerouslySetInnerHTML: { __html: svg }
+                });
+            }
+
+            function ConfirmDialog(props) {
+                return h('div', { className: "fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[200] flex items-center justify-center p-4" },
+                    h('div', { className: "bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 space-y-4 animate-in shadow-xl" },
+                        h('div', { className: "flex items-center gap-3" },
+                            h('div', { className: "w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center" },
+                                h(Icon, { name: "AlertTriangle", className: "w-5 h-5 text-rose-600" })
+                            ),
+                            h('h3', { className: "text-sm font-bold text-slate-800 dark:text-slate-200" }, "Confirm Action")
+                        ),
+                        h('p', { className: "text-sm text-slate-600 dark:text-slate-400" }, props.message),
+                        h('div', { className: "flex gap-3 pt-2" },
+                            h('button', {
+                                onClick: props.onCancel,
+                                className: "flex-1 p-3 rounded-xl font-bold text-xs uppercase text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                            }, "Cancel"),
+                            h('button', {
+                                onClick: props.onConfirm,
+                                className: "flex-1 p-3 rounded-xl font-bold text-xs uppercase text-white bg-rose-500 hover:bg-rose-600 transition-colors"
+                            }, "Delete")
+                        )
+                    )
+                );
+            }
+
+            function LogItem(props) {
+                var log = props.log;
+                var onDelete = props.onDelete;
+                var type = READING_TYPES.find(function(t) { return t.id === log.type; }) || {};
+                var genre = GENRES.find(function(g) { return g.id === log.genre; }) || {};
+                var difficulty = DIFFICULTY_LEVELS.find(function(d) { return d.id === log.difficulty; }) || {};
+
+                return h('div', { className: "bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 flex items-center justify-between animate-in" },
+                    h('div', { className: "flex items-center gap-3 flex-1 min-w-0" },
+                        h('span', { className: "text-lg flex-shrink-0" }, type.icon),
+                        h('div', { className: "min-w-0 flex-1" },
+                            h('p', { className: "font-bold text-xs truncate text-slate-800 dark:text-slate-200" }, log.bookTitle || type.name),
+                            h('p', { className: "text-[10px] font-medium text-slate-400 dark:text-slate-500" },
+                                log.date + ' • ' + log.duration + 'm' + (log.pages ? ' • ' + log.pages + 'p' : '')
+                            ),
+                            h('p', { className: "text-[9px] text-teal-600 dark:text-teal-400" }, genre.name + ' • ' + difficulty.name)
+                        )
+                    ),
+                    h('button', {
+                        onClick: function() { onDelete(log.id); },
+                        className: "text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"
+                    },
+                        h(Icon, { name: "Trash2", className: "w-3.5 h-3.5" })
+                    )
+                );
+            }
+
+            function NavBtn(props) {
+                return h('button', {
+                    onClick: props.onClick,
+                    className: "p-2.5 rounded-xl transition-all " + (props.active ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-teal-600')
+                },
+                    h(Icon, { name: props.icon, className: "w-5 h-5" })
+                );
+            }
+
+            function App() {
+                var logsState = useState(function() {
+                    return JSON.parse(safeStorage.getItem(STORAGE_KEY_LOGS) || '[]');
+                });
+                var logs = logsState[0];
+                var setLogs = logsState[1];
+
+                var profileState = useState(function() {
+                    return JSON.parse(safeStorage.getItem(STORAGE_KEY_PROFILE) || '{"name":"Student Reader","grade":"5","readingLevel":"Intermediate","favoriteGenre":"fantasy","weeklyGoal":150}');
+                });
+                var profile = profileState[0];
+                var setProfile = profileState[1];
+
+                var tabState = useState('dashboard');
+                var activeTab = tabState[0];
+                var setActiveTab = tabState[1];
+
+                var modalState = useState(false);
+                var showAddModal = modalState[0];
+                var setShowAddModal = modalState[1];
+
+                var selectedDateState = useState(new Date().toISOString().split('T')[0]);
+                var selectedDate = selectedDateState[0];
+                var setSelectedDate = selectedDateState[1];
+
+                var viewDateState = useState(new Date());
+                var viewDate = viewDateState[0];
+                var setViewDate = viewDateState[1];
+
+                var statusState = useState(null);
+                var statusMsg = statusState[0];
+                var setStatusMsg = statusState[1];
+
+                var newLogState = useState({
+                    type: 'independent',
+                    genre: 'fiction',
+                    bookTitle: '',
+                    duration: '',
+                    pages: '',
+                    difficulty: 'justright',
+                    date: new Date().toISOString().split('T')[0],
+                    completed: false
+                });
+                var newLog = newLogState[0];
+                var setNewLog = newLogState[1];
+
+                // Completed books with reviews
+                var booksState = useState(function() {
+                    return JSON.parse(safeStorage.getItem(STORAGE_KEY_BOOKS) || '[]');
+                });
+                var completedBooks = booksState[0];
+                var setCompletedBooks = booksState[1];
+
+                // Review modal state
+                var reviewModalState = useState(null);
+                var reviewModal = reviewModalState[0];
+                var setReviewModal = reviewModalState[1];
+
+                var fileInputRef = useRef(null);
+
+                var confirmState = useState(null);
+                var confirmDialog = confirmState[0];
+                var setConfirmDialog = confirmState[1];
+
+                var expandedMonthsState = useState({});
+                var expandedMonths = expandedMonthsState[0];
+                var setExpandedMonths = expandedMonthsState[1];
+
+                var splashState = useState(true);
+                var showSplash = splashState[0];
+                var setShowSplash = splashState[1];
+
+                var installState = useState(null);
+                var deferredPrompt = installState[0];
+                var setDeferredPrompt = installState[1];
+
+                var bannerState = useState(false);
+                var showInstallBanner = bannerState[0];
+                var setShowInstallBanner = bannerState[1];
+
+                var iosState = useState(false);
+                var isIOS = iosState[0];
+                var setIsIOS = iosState[1];
+
+                var standaloneState = useState(false);
+                var isStandalone = standaloneState[0];
+                var setIsStandalone = standaloneState[1];
+
+                useEffect(function() {
+                    var splashTimer = setTimeout(function() {
+                        setShowSplash(false);
+                    }, 1500);
+                    return function() { clearTimeout(splashTimer); };
+                }, []);
+
+                useEffect(function() {
+                    var standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                                     window.matchMedia('(display-mode: fullscreen)').matches ||
+                                     window.navigator.standalone === true;
+                    setIsStandalone(standalone);
+
+                    var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    setIsIOS(iOS);
+
+                    if (!standalone) {
+                        var handler = function(e) {
+                            e.preventDefault();
+                            setDeferredPrompt(e);
+                            setShowInstallBanner(true);
+                        };
+                        window.addEventListener('beforeinstallprompt', handler);
+                        if (iOS) setShowInstallBanner(true);
+                        return function() { window.removeEventListener('beforeinstallprompt', handler); };
+                    }
+                }, []);
+
+                function handleInstallClick() {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(result) {
+                            if (result.outcome === 'accepted') {
+                                setDeferredPrompt(null);
+                                setShowInstallBanner(false);
+                            }
+                        });
+                    } else if (isIOS) {
+                        notify("iOS: Tap 'Share' then 'Add to Home Screen'");
+                    } else {
+                        notify("Use browser menu to 'Install' or 'Add to Home Screen'");
+                    }
+                }
+
+                useEffect(function() {
+                    safeStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+                }, [logs]);
+
+                useEffect(function() {
+                    safeStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
+                }, [profile]);
+
+                useEffect(function() {
+                    safeStorage.setItem(STORAGE_KEY_BOOKS, JSON.stringify(completedBooks));
+                }, [completedBooks]);
+
+                function notify(msg) {
+                    setStatusMsg(msg);
+                    setTimeout(function() { setStatusMsg(null); }, 2500);
+                }
+
+                function addLog(e) {
+                    e.preventDefault();
+                    var durationVal = parseInt(newLog.duration || 0);
+                    if (durationVal <= 0) {
+                        notify('Please enter minutes read');
+                        return;
+                    }
+                    var entry = Object.assign({}, newLog, {
+                        id: Date.now(),
+                        duration: durationVal,
+                        pages: parseInt(newLog.pages) || 0
+                    });
+                    var newLogs = [entry].concat(logs).sort(function(a, b) {
+                        return new Date(b.date) - new Date(a.date);
+                    });
+                    setLogs(newLogs);
+
+                    // If book is marked as completed, add to completed books
+                    if (newLog.completed && newLog.bookTitle && newLog.bookTitle.trim() !== '') {
+                        var bookKey = newLog.bookTitle.toLowerCase().trim();
+                        var alreadyExists = completedBooks.some(function(b) { return b.title.toLowerCase().trim() === bookKey; });
+                        if (!alreadyExists) {
+                            var newBook = {
+                                id: Date.now(),
+                                title: newLog.bookTitle,
+                                genre: newLog.genre,
+                                completedDate: newLog.date,
+                                review: ''
+                            };
+                            setCompletedBooks([newBook].concat(completedBooks));
+                            notify('Book completed! Add a review in My Books.');
+                        } else {
+                            notify('Reading logged!');
+                        }
+                    } else {
+                        notify('Reading logged!');
+                    }
+
+                    setShowAddModal(false);
+                    setNewLog(Object.assign({}, newLog, { duration: '', pages: '', bookTitle: '', completed: false }));
+                }
+
+                function updateBookReview(bookId, review) {
+                    setCompletedBooks(completedBooks.map(function(b) {
+                        if (b.id === bookId) {
+                            return Object.assign({}, b, { review: review });
+                        }
+                        return b;
+                    }));
+                    setReviewModal(null);
+                    notify('Review saved!');
+                }
+
+                function deleteCompletedBook(bookId) {
+                    setConfirmDialog({
+                        message: "Remove this book from your completed list?",
+                        onConfirm: function() {
+                            setCompletedBooks(completedBooks.filter(function(b) { return b.id !== bookId; }));
+                            notify('Book removed');
+                            setConfirmDialog(null);
+                        },
+                        onCancel: function() { setConfirmDialog(null); }
+                    });
+                }
+
+                function deleteLog(id) {
+                    setLogs(logs.filter(function(l) { return l.id !== id; }));
+                    notify('Entry deleted');
+                }
+
+                function exportData() {
+                    var dataStr = JSON.stringify({ logs: logs, profile: profile, completedBooks: completedBooks }, null, 2);
+                    var dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                    var linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', 'reading-log-data.json');
+                    linkElement.click();
+                }
+
+                function importData(event) {
+                    var file = event.target.files[0];
+                    if (!file) return;
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            var json = JSON.parse(e.target.result);
+                            if (json.logs) setLogs(json.logs);
+                            if (json.profile) setProfile(json.profile);
+                            if (json.completedBooks) setCompletedBooks(json.completedBooks);
+                            notify('Data restored!');
+                        } catch (err) {
+                            notify('Error reading file');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+
+                function resetAllData() {
+                    setConfirmDialog({
+                        message: "Delete all reading history? This action cannot be undone.",
+                        onConfirm: function() {
+                            setLogs([]);
+                            notify('History cleared');
+                            setConfirmDialog(null);
+                        },
+                        onCancel: function() { setConfirmDialog(null); }
+                    });
+                }
+
+                var readingInsight = useMemo(function() {
+                    var last7Days = logs.filter(function(l) {
+                        return (new Date() - new Date(l.date)) / (1000 * 3600 * 24) <= 7;
+                    });
+                    var totalMins = last7Days.reduce(function(a, c) { return a + c.duration; }, 0);
+                    var daysRead = new Set(last7Days.map(function(l) { return l.date; })).size;
+
+                    if (daysRead >= 5) {
+                        return { text: "Amazing! You're building a great reading habit!", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30", icon: "Star" };
+                    }
+                    if (daysRead >= 3) {
+                        return { text: "Good progress! Keep reading regularly.", color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30", icon: "TrendingUp" };
+                    }
+                    if (totalMins > 0) {
+                        return { text: "You've started! Try to read a bit each day.", color: "text-amber-600 bg-amber-50 dark:bg-amber-900/30", icon: "BookOpen" };
+                    }
+                    return { text: "Start your reading adventure today!", color: "text-slate-500 bg-slate-100 dark:bg-slate-800", icon: "BookMarked" };
+                }, [logs]);
+
+                var weeklyProgress = useMemo(function() {
+                    var currentWeek = getWeekIdentifier(new Date());
+                    var weekLogs = logs.filter(function(l) {
+                        return getWeekIdentifier(l.date) === currentWeek;
+                    });
+                    var mins = weekLogs.reduce(function(a, c) { return a + c.duration; }, 0);
+                    var pages = weekLogs.reduce(function(a, c) { return a + (c.pages || 0); }, 0);
+                    var sessions = weekLogs.length;
+                    var daysRead = new Set(weekLogs.map(function(l) { return l.date; })).size;
+                    return {
+                        mins: mins,
+                        pages: pages,
+                        sessions: sessions,
+                        daysRead: daysRead,
+                        percent: Math.min(100, (mins / profile.weeklyGoal) * 100)
+                    };
+                }, [logs, profile.weeklyGoal]);
+
+                // Reading streak calculation
+                var readingStreak = useMemo(function() {
+                    if (logs.length === 0) return { current: 0, best: 0 };
+
+                    var today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    // Get unique reading dates sorted descending
+                    var readDates = Array.from(new Set(logs.map(function(l) { return l.date; })))
+                        .sort(function(a, b) { return new Date(b) - new Date(a); });
+
+                    // Calculate current streak
+                    var currentStreak = 0;
+                    var checkDate = new Date(today);
+
+                    // Check if read today or yesterday (allow 1 day grace)
+                    var todayStr = today.toISOString().split('T')[0];
+                    var yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    var yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                    var startIdx = readDates.indexOf(todayStr);
+                    if (startIdx === -1) {
+                        startIdx = readDates.indexOf(yesterdayStr);
+                        if (startIdx !== -1) {
+                            checkDate = yesterday;
+                        }
+                    }
+
+                    if (startIdx !== -1) {
+                        for (var i = 0; i < 365; i++) {
+                            var dateStr = checkDate.toISOString().split('T')[0];
+                            if (readDates.indexOf(dateStr) !== -1) {
+                                currentStreak++;
+                                checkDate.setDate(checkDate.getDate() - 1);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Calculate best streak
+                    var bestStreak = 0;
+                    var tempStreak = 0;
+                    for (var j = 0; j < readDates.length; j++) {
+                        if (j === 0) {
+                            tempStreak = 1;
+                        } else {
+                            var prevDate = new Date(readDates[j - 1]);
+                            var currDate = new Date(readDates[j]);
+                            var diffDays = (prevDate - currDate) / (1000 * 60 * 60 * 24);
+                            if (diffDays === 1) {
+                                tempStreak++;
+                            } else {
+                                bestStreak = Math.max(bestStreak, tempStreak);
+                                tempStreak = 1;
+                            }
+                        }
+                    }
+                    bestStreak = Math.max(bestStreak, tempStreak);
+
+                    return { current: currentStreak, best: bestStreak };
+                }, [logs]);
+
+                // Currently reading (most recent book)
+                var currentlyReading = useMemo(function() {
+                    if (logs.length === 0) return null;
+                    var recentWithTitle = logs.find(function(l) { return l.bookTitle && l.bookTitle.trim() !== ''; });
+                    return recentWithTitle || null;
+                }, [logs]);
+
+                // All-time stats
+                var allTimeStats = useMemo(function() {
+                    var totalMins = logs.reduce(function(a, c) { return a + c.duration; }, 0);
+                    var totalPages = logs.reduce(function(a, c) { return a + (c.pages || 0); }, 0);
+                    var uniqueBooks = new Set(logs.filter(function(l) { return l.bookTitle && l.bookTitle.trim() !== ''; }).map(function(l) { return l.bookTitle.toLowerCase().trim(); })).size;
+                    var totalSessions = logs.length;
+                    return { totalMins: totalMins, totalPages: totalPages, uniqueBooks: uniqueBooks, totalSessions: totalSessions };
+                }, [logs]);
+
+                // Recent books for quick selection
+                var recentBooks = useMemo(function() {
+                    var books = [];
+                    var seen = new Set();
+                    logs.forEach(function(l) {
+                        if (l.bookTitle && l.bookTitle.trim() !== '' && !seen.has(l.bookTitle.toLowerCase().trim())) {
+                            seen.add(l.bookTitle.toLowerCase().trim());
+                            books.push({ title: l.bookTitle, genre: l.genre });
+                        }
+                    });
+                    return books.slice(0, 5);
+                }, [logs]);
+
+                // Genre stats
+                var genreStats = useMemo(function() {
+                    var counts = {};
+                    logs.forEach(function(l) {
+                        counts[l.genre] = (counts[l.genre] || 0) + 1;
+                    });
+                    return Object.entries(counts)
+                        .map(function(entry) {
+                            var genre = GENRES.find(function(g) { return g.id === entry[0]; });
+                            return { id: entry[0], name: genre ? genre.name : entry[0], count: entry[1] };
+                        })
+                        .sort(function(a, b) { return b.count - a.count; });
+                }, [logs]);
+
+                // Reader type calculation
+                var readerType = useMemo(function() {
+                    var totalSessions = logs.length;
+                    var totalMins = logs.reduce(function(a, c) { return a + c.duration; }, 0);
+                    var totalPages = logs.reduce(function(a, c) { return a + (c.pages || 0); }, 0);
+                    var avgMins = totalSessions > 0 ? totalMins / totalSessions : 0;
+                    var avgPages = totalSessions > 0 ? totalPages / totalSessions : 0;
+                    var genreCount = genreStats.length;
+                    var topGenre = genreStats.length > 0 ? genreStats[0].id : '';
+                    var streak = readingStreak.current;
+
+                    var stats = { totalSessions: totalSessions, avgMins: avgMins, avgPages: avgPages, genreCount: genreCount, topGenre: topGenre, streak: streak };
+
+                    for (var i = 0; i < READER_TYPES.length; i++) {
+                        if (READER_TYPES[i].check(stats)) {
+                            return READER_TYPES[i];
+                        }
+                    }
+                    return READER_TYPES[READER_TYPES.length - 1];
+                }, [logs, genreStats, readingStreak]);
+
+                function getWeekEnd(weekStart) {
+                    var end = new Date(weekStart);
+                    end.setDate(end.getDate() + 6);
+                    return end;
+                }
+
+                function formatWeekRange(weekStart) {
+                    var start = new Date(weekStart);
+                    var end = getWeekEnd(weekStart);
+                    var startDay = start.getDate();
+                    var endDay = end.getDate();
+                    var startMonth = start.toLocaleString('default', { month: 'short' });
+                    var endMonth = end.toLocaleString('default', { month: 'short' });
+                    if (startMonth === endMonth) {
+                        return startDay + ' - ' + endDay + ' ' + startMonth;
+                    }
+                    return startDay + ' ' + startMonth + ' - ' + endDay + ' ' + endMonth;
+                }
+
+                var weeklyHistory = useMemo(function() {
+                    var today = new Date();
+                    var currentWeekId = getWeekIdentifier(today);
+                    var currentYear = today.getFullYear();
+                    var startDate = new Date(currentYear, 0, 1);
+                    var weeks = [];
+                    var checkDate = new Date(startDate);
+
+                    while (true) {
+                        var weekId = getWeekIdentifier(checkDate);
+                        if (new Date(weekId) > today) break;
+
+                        var mins = logs.filter(function(l) {
+                            return getWeekIdentifier(l.date) === weekId;
+                        }).reduce(function(a, c) { return a + c.duration; }, 0);
+
+                        var goalMet = mins >= profile.weeklyGoal;
+                        var isCurrent = weekId === currentWeekId;
+                        var weekStartDate = new Date(weekId);
+                        var monthKey = weekStartDate.getFullYear() + '-' + String(weekStartDate.getMonth() + 1).padStart(2, '0');
+                        var monthName = weekStartDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                        weeks.push({
+                            weekId: weekId,
+                            weekRange: formatWeekRange(weekId),
+                            mins: mins,
+                            goalMet: goalMet,
+                            isCurrent: isCurrent,
+                            monthKey: monthKey,
+                            monthName: monthName,
+                            percent: Math.min(100, (mins / profile.weeklyGoal) * 100)
+                        });
+
+                        checkDate.setDate(checkDate.getDate() + 7);
+                    }
+
+                    return weeks.reverse();
+                }, [logs, profile.weeklyGoal]);
+
+                var weeksByMonth = useMemo(function() {
+                    var grouped = {};
+                    var currentMonth = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
+
+                    weeklyHistory.forEach(function(week) {
+                        if (!grouped[week.monthKey]) {
+                            grouped[week.monthKey] = {
+                                monthKey: week.monthKey,
+                                monthName: week.monthName,
+                                weeks: [],
+                                isCurrentMonth: week.monthKey === currentMonth
+                            };
+                        }
+                        grouped[week.monthKey].weeks.push(week);
+                    });
+
+                    return Object.values(grouped).sort(function(a, b) {
+                        return b.monthKey.localeCompare(a.monthKey);
+                    });
+                }, [weeklyHistory]);
+
+                function toggleMonth(monthKey) {
+                    var newExpanded = Object.assign({}, expandedMonths);
+                    newExpanded[monthKey] = !newExpanded[monthKey];
+                    setExpandedMonths(newExpanded);
+                }
+
+                function renderDashboard() {
+                    return h('div', { className: "space-y-4 animate-in" },
+                        // Welcome card with streak
+                        h('div', { className: "bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl p-5 text-white shadow-lg" },
+                            h('div', { className: "flex justify-between items-start" },
+                                h('div', null,
+                                    h('p', { className: "text-[9px] font-bold opacity-70 uppercase tracking-widest mb-0.5" }, "Welcome Back"),
+                                    h('h2', { className: "text-xl font-extrabold" }, profile.name),
+                                    h('div', { className: "flex gap-2 mt-3" },
+                                        h('div', { className: "bg-white/10 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider" }, "Grade " + profile.grade),
+                                        h('div', { className: "bg-white/10 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider" }, profile.readingLevel)
+                                    )
+                                ),
+                                // Reading streak badge
+                                h('div', { className: "bg-white/20 rounded-xl p-2.5 text-center min-w-[60px]" },
+                                    h('div', { className: "flex items-center justify-center gap-1" },
+                                        h('span', { className: "text-lg" }, "🔥"),
+                                        h('span', { className: "text-xl font-black" }, readingStreak.current)
+                                    ),
+                                    h('p', { className: "text-[8px] font-bold opacity-80 uppercase" }, "Day Streak")
+                                )
+                            )
+                        ),
+
+                        // Currently Reading Section
+                        currentlyReading && h('div', { className: "bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 shadow-sm" },
+                            h('div', { className: "flex items-center gap-3" },
+                                h('div', { className: "w-10 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm" },
+                                    h(Icon, { name: "BookOpen", className: "w-5 h-5 text-white" })
+                                ),
+                                h('div', { className: "flex-1 min-w-0" },
+                                    h('p', { className: "text-[9px] font-bold text-teal-600 uppercase tracking-wider" }, "Currently Reading"),
+                                    h('p', { className: "font-bold text-sm text-slate-800 dark:text-slate-200 truncate" }, currentlyReading.bookTitle),
+                                    h('p', { className: "text-[10px] text-slate-400" },
+                                        (GENRES.find(function(g) { return g.id === currentlyReading.genre; }) || {}).name || 'Unknown'
+                                    )
+                                ),
+                                h('button', {
+                                    onClick: function() {
+                                        setNewLog(Object.assign({}, newLog, {
+                                            bookTitle: currentlyReading.bookTitle,
+                                            genre: currentlyReading.genre
+                                        }));
+                                        setShowAddModal(true);
+                                    },
+                                    className: "bg-teal-50 dark:bg-teal-900/30 text-teal-600 p-2 rounded-lg"
+                                },
+                                    h(Icon, { name: "Plus", className: "w-4 h-4" })
+                                )
+                            )
+                        ),
+
+                        // Reader Type Badge
+                        h('div', { className: "bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-xl text-white shadow-sm" },
+                            h('div', { className: "flex items-center gap-3" },
+                                h('span', { className: "text-2xl" }, readerType.emoji),
+                                h('div', { className: "flex-1" },
+                                    h('p', { className: "text-[9px] font-bold opacity-70 uppercase" }, "Your Reader Type"),
+                                    h('p', { className: "font-extrabold text-sm" }, readerType.name)
+                                ),
+                                h('p', { className: "text-[10px] opacity-80 max-w-[100px] text-right" }, readerType.desc)
+                            )
+                        ),
+
+                        // Insight message
+                        h('div', { className: "p-3 rounded-xl flex gap-2.5 items-center border border-transparent " + readingInsight.color },
+                            h(Icon, { name: readingInsight.icon, className: "w-4 h-4" }),
+                            h('p', { className: "text-[11px] font-bold" }, readingInsight.text)
+                        ),
+
+                        // Stats grid - 4 columns
+                        h('div', { className: "grid grid-cols-4 gap-2" },
+                            h('div', { className: "bg-white dark:bg-slate-800 p-2.5 rounded-xl border dark:border-slate-700 text-center" },
+                                h('p', { className: "text-xl font-extrabold text-teal-600" }, weeklyProgress.mins),
+                                h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Mins")
+                            ),
+                            h('div', { className: "bg-white dark:bg-slate-800 p-2.5 rounded-xl border dark:border-slate-700 text-center" },
+                                h('p', { className: "text-xl font-extrabold text-amber-600" }, weeklyProgress.pages),
+                                h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Pages")
+                            ),
+                            h('div', { className: "bg-white dark:bg-slate-800 p-2.5 rounded-xl border dark:border-slate-700 text-center" },
+                                h('p', { className: "text-xl font-extrabold text-purple-600" }, allTimeStats.uniqueBooks),
+                                h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Books")
+                            ),
+                            h('div', { className: "bg-white dark:bg-slate-800 p-2.5 rounded-xl border dark:border-slate-700 text-center" },
+                                h('p', { className: "text-xl font-extrabold text-rose-500" }, readingStreak.best),
+                                h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Best")
+                            )
+                        ),
+
+                        // Weekly progress bar
+                        h('div', { className: "bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700" },
+                            h('div', { className: "flex justify-between items-center mb-2" },
+                                h('span', { className: "text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase" }, "Weekly Goal"),
+                                h('span', { className: "text-[10px] font-bold text-teal-600" }, weeklyProgress.mins + " / " + profile.weeklyGoal + " mins")
+                            ),
+                            h('div', { className: "h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" },
+                                h('div', {
+                                    className: "h-full rounded-full bg-gradient-to-r from-teal-500 to-teal-400 transition-all duration-500",
+                                    style: { width: Math.min(100, weeklyProgress.percent) + '%' }
+                                })
+                            ),
+                            weeklyProgress.percent >= 100 && h('p', { className: "text-[10px] text-emerald-500 font-bold mt-1.5 flex items-center gap-1" },
+                                h(Icon, { name: "CheckCircle", className: "w-3 h-3" }),
+                                "Goal achieved! Great job!"
+                            )
+                        ),
+
+                        // Recent Reading
+                        h('div', { className: "space-y-2.5" },
+                            h('h3', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1" }, "Recent Reading"),
+                            logs.slice(0, 3).map(function(log) {
+                                return h(LogItem, { key: log.id, log: log, onDelete: deleteLog });
+                            }),
+                            logs.length === 0 && h('p', { className: "text-center py-4 text-slate-300 dark:text-slate-600 text-xs italic" }, "No reading logged yet. Start your journey!")
+                        )
+                    );
+                }
+
+                function renderHistory() {
+                    var firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+                    var daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+
+                    return h('div', { className: "space-y-4 animate-in" },
+                        h('div', { className: "bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm" },
+                            h('div', { className: "flex justify-between items-center mb-3 px-1" },
+                                h('h3', { className: "font-extrabold text-xs uppercase text-slate-500 dark:text-slate-400" },
+                                    viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+                                ),
+                                h('div', { className: "flex gap-1" },
+                                    h('button', {
+                                        onClick: function() { setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1)); },
+                                        className: "p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                    }, h(Icon, { name: "ChevronLeft" })),
+                                    h('button', {
+                                        onClick: function() { setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)); },
+                                        className: "p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                    }, h(Icon, { name: "ChevronRight" }))
+                                )
+                            ),
+                            h('div', { className: "grid grid-cols-7 gap-0.5 text-center" },
+                                ['S','M','T','W','T','F','S'].map(function(d, i) {
+                                    return h('span', { key: 'day-' + i, className: "text-[9px] font-bold text-slate-300 dark:text-slate-600 py-1" }, d);
+                                }),
+                                Array.from({ length: firstDay }).map(function(_, i) {
+                                    return h('div', { key: 'empty-' + i });
+                                }),
+                                Array.from({ length: daysInMonth }).map(function(_, i) {
+                                    var day = i + 1;
+                                    var dStr = viewDate.getFullYear() + '-' + String(viewDate.getMonth() + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                                    var hasLog = logs.some(function(l) { return l.date === dStr; });
+                                    var isSelected = selectedDate === dStr;
+                                    var isToday = dStr === new Date().toISOString().split('T')[0];
+                                    return h('button', {
+                                        key: day,
+                                        onClick: function() { setSelectedDate(dStr); },
+                                        className: "aspect-square rounded-lg text-xs font-bold flex flex-col items-center justify-center relative " +
+                                            (isSelected ? 'bg-teal-600 text-white' : isToday ? 'text-teal-600 bg-teal-50 dark:bg-teal-900/30' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700')
+                                    },
+                                        day,
+                                        hasLog && h('div', { className: "w-1 h-1 rounded-full absolute bottom-1 " + (isSelected ? 'bg-white' : 'bg-teal-400') })
+                                    );
+                                })
+                            )
+                        ),
+                        h('div', { className: "flex flex-col" },
+                            h('h4', { className: "text-[10px] font-bold text-slate-400 uppercase px-1 mb-2" }, "Reading on " + selectedDate),
+                            h('div', { className: "space-y-2 overflow-y-auto max-h-40", style: { WebkitOverflowScrolling: 'touch' } },
+                                logs.filter(function(l) { return l.date === selectedDate; }).map(function(log) {
+                                    return h(LogItem, { key: log.id, log: log, onDelete: deleteLog });
+                                }),
+                                logs.filter(function(l) { return l.date === selectedDate; }).length === 0 &&
+                                    h('p', { className: "text-center py-4 text-slate-300 dark:text-slate-600 text-[11px] italic" }, "No reading this day")
+                            )
+                        )
+                    );
+                }
+
+                function renderAnalysis() {
+                    var dashOffset = 314.15 - (314.15 * weeklyProgress.percent) / 100;
+                    return h('div', { className: "space-y-5 animate-in" },
+                        h('div', { className: "bg-white dark:bg-slate-800 p-6 rounded-3xl border dark:border-slate-700 shadow-sm text-center" },
+                            h('h3', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4" }, "This Week's Reading"),
+                            h('div', { className: "relative w-28 h-28 mx-auto flex items-center justify-center mb-4" },
+                                h('svg', { className: "w-full h-full -rotate-90" },
+                                    h('circle', { cx: "56", cy: "56", r: "50", stroke: "#f1f5f9", strokeWidth: "8", fill: "none" }),
+                                    h('circle', {
+                                        cx: "56", cy: "56", r: "50", stroke: "#0d9488", strokeWidth: "8", fill: "none",
+                                        strokeDasharray: "314.15", strokeDashoffset: dashOffset, strokeLinecap: "round",
+                                        className: "transition-all duration-700"
+                                    })
+                                ),
+                                h('div', { className: "absolute text-xl font-black text-teal-600" }, Math.round(weeklyProgress.percent) + "%")
+                            ),
+                            h('p', { className: "text-lg font-extrabold text-teal-600" }, weeklyProgress.mins + " / " + profile.weeklyGoal + "m"),
+                            h('p', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-tighter" }, "Weekly reading goal")
+                        ),
+                        h('div', { className: "bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm" },
+                            h('h4', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3" }, "This Week's Stats"),
+                            h('div', { className: "grid grid-cols-3 gap-2" },
+                                h('div', { className: "text-center p-2 bg-teal-50 dark:bg-teal-900/30 rounded-xl" },
+                                    h('div', { className: "flex justify-center mb-1" },
+                                        h(Icon, { name: "BookOpen", className: "w-4 h-4 text-teal-600" })
+                                    ),
+                                    h('p', { className: "text-lg font-black text-teal-700 dark:text-teal-400" }, weeklyProgress.sessions),
+                                    h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Sessions")
+                                ),
+                                h('div', { className: "text-center p-2 bg-amber-50 dark:bg-amber-900/30 rounded-xl" },
+                                    h('div', { className: "flex justify-center mb-1" },
+                                        h(Icon, { name: "FileText", className: "w-4 h-4 text-amber-600" })
+                                    ),
+                                    h('p', { className: "text-lg font-black text-amber-700 dark:text-amber-400" }, weeklyProgress.pages),
+                                    h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Pages")
+                                ),
+                                h('div', { className: "text-center p-2 bg-purple-50 dark:bg-purple-900/30 rounded-xl" },
+                                    h('div', { className: "flex justify-center mb-1" },
+                                        h(Icon, { name: "Calendar", className: "w-4 h-4 text-purple-600" })
+                                    ),
+                                    h('p', { className: "text-lg font-black text-purple-700 dark:text-purple-400" }, weeklyProgress.daysRead),
+                                    h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Days Read")
+                                )
+                            )
+                        ),
+                        genreStats.length > 0 && h('div', { className: "bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm" },
+                            h('h4', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3" }, "Your Genre Breakdown"),
+                            h('div', { className: "space-y-2" },
+                                genreStats.slice(0, 5).map(function(g, i) {
+                                    var maxCount = genreStats[0].count;
+                                    var percent = (g.count / maxCount) * 100;
+                                    var colors = ['bg-teal-500', 'bg-amber-500', 'bg-purple-500', 'bg-rose-500', 'bg-blue-500'];
+                                    return h('div', { key: g.id, className: "flex items-center gap-2" },
+                                        h('span', { className: "text-[10px] font-bold text-slate-500 dark:text-slate-400 w-24 truncate" }, g.name),
+                                        h('div', { className: "flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" },
+                                            h('div', { className: "h-full rounded-full " + colors[i % colors.length], style: { width: percent + '%' } })
+                                        ),
+                                        h('span', { className: "text-[10px] font-bold text-slate-400 w-6 text-right" }, g.count)
+                                    );
+                                })
+                            )
+                        ),
+                        h('div', { className: "grid grid-cols-2 gap-3" },
+                            h('div', { className: "bg-white dark:bg-slate-800 p-3.5 rounded-2xl border dark:border-slate-700 shadow-sm text-center" },
+                                h('p', { className: "text-[9px] font-bold text-slate-400 uppercase" }, "Total Sessions"),
+                                h('p', { className: "text-lg font-black text-teal-600" }, logs.length)
+                            ),
+                            h('div', { className: "bg-white dark:bg-slate-800 p-3.5 rounded-2xl border dark:border-slate-700 shadow-sm text-center" },
+                                h('p', { className: "text-[9px] font-bold text-slate-400 uppercase" }, "Avg Mins/Session"),
+                                h('p', { className: "text-lg font-black text-teal-600" },
+                                    logs.length ? Math.round(logs.reduce(function(a, c) { return a + c.duration; }, 0) / logs.length) : 0
+                                )
+                            )
+                        )
+                    );
+                }
+
+                function renderWeekItem(week) {
+                    return h('div', {
+                        key: week.weekId,
+                        className: "flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl " + (week.isCurrent ? 'ring-2 ring-teal-600' : '')
+                    },
+                        h('div', { className: "flex items-center gap-3" },
+                            h('div', {
+                                className: "w-8 h-8 rounded-full flex items-center justify-center " +
+                                    (week.isCurrent ? 'bg-teal-100 dark:bg-teal-900/50' : week.goalMet ? 'bg-emerald-100 dark:bg-emerald-900/50' : 'bg-rose-100 dark:bg-rose-900/50')
+                            },
+                                week.isCurrent
+                                    ? h(Icon, { name: "Clock", className: "w-4 h-4 text-teal-600" })
+                                    : week.goalMet
+                                        ? h(Icon, { name: "Check", className: "w-4 h-4 text-emerald-600" })
+                                        : h(Icon, { name: "X", className: "w-4 h-4 text-rose-500" })
+                            ),
+                            h('div', null,
+                                h('p', { className: "text-[11px] font-bold text-slate-700 dark:text-slate-300" }, week.weekRange),
+                                h('p', { className: "text-[9px] text-slate-400" },
+                                    week.mins + "m / " + profile.weeklyGoal + "m" +
+                                    (week.isCurrent ? " (In Progress)" : week.goalMet ? " ✓ Goal Met" : " ✗ Missed")
+                                )
+                            )
+                        ),
+                        h('div', { className: "w-12 h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden" },
+                            h('div', {
+                                className: "h-full rounded-full transition-all " +
+                                    (week.isCurrent ? 'bg-teal-600' : week.goalMet ? 'bg-emerald-500' : 'bg-rose-400'),
+                                style: { width: week.percent + '%' }
+                            })
+                        )
+                    );
+                }
+
+                function renderMonthGroup(monthData) {
+                    var isExpanded = expandedMonths[monthData.monthKey];
+                    var pastWeeks = monthData.weeks.filter(function(w) { return !w.isCurrent; });
+                    var goalsMetCount = pastWeeks.filter(function(w) { return w.goalMet; }).length;
+                    var totalWeeks = pastWeeks.length;
+
+                    if (totalWeeks === 0) return null;
+
+                    return h('div', { key: monthData.monthKey, className: "space-y-2" },
+                        h('button', {
+                            onClick: function() { toggleMonth(monthData.monthKey); },
+                            className: "w-full flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                        },
+                            h('div', { className: "flex items-center gap-3" },
+                                h('div', {
+                                    className: "w-8 h-8 rounded-full flex items-center justify-center " +
+                                        (goalsMetCount === totalWeeks ? 'bg-emerald-100 dark:bg-emerald-900/50' : goalsMetCount === 0 ? 'bg-rose-100 dark:bg-rose-900/50' : 'bg-amber-100 dark:bg-amber-900/50')
+                                },
+                                    goalsMetCount === totalWeeks
+                                        ? h(Icon, { name: "Trophy", className: "w-4 h-4 text-emerald-600" })
+                                        : goalsMetCount === 0
+                                            ? h(Icon, { name: "Calendar", className: "w-4 h-4 text-rose-500" })
+                                            : h(Icon, { name: "Calendar", className: "w-4 h-4 text-amber-600" })
+                                ),
+                                h('div', { className: "text-left" },
+                                    h('p', { className: "text-xs font-bold text-slate-700 dark:text-slate-300" }, monthData.monthName),
+                                    h('p', { className: "text-[9px] " + (goalsMetCount === totalWeeks ? 'text-emerald-600' : goalsMetCount === 0 ? 'text-rose-500' : 'text-slate-400') },
+                                        goalsMetCount + "/" + totalWeeks + " weeks goal met"
+                                    )
+                                )
+                            ),
+                            h('div', { className: "flex items-center gap-2" },
+                                h('div', { className: "flex gap-1" },
+                                    pastWeeks.map(function(w, i) {
+                                        return h('div', {
+                                            key: i,
+                                            className: "w-2 h-2 rounded-full " + (w.goalMet ? 'bg-emerald-400' : 'bg-rose-400')
+                                        });
+                                    })
+                                ),
+                                h(Icon, {
+                                    name: isExpanded ? "ChevronUp" : "ChevronDown",
+                                    className: "w-4 h-4 text-slate-400"
+                                })
+                            )
+                        ),
+                        isExpanded && h('div', { className: "space-y-2 mt-2 animate-in" },
+                            pastWeeks.map(function(week) {
+                                return renderWeekItem(week);
+                            })
+                        )
+                    );
+                }
+
+                function renderGoals() {
+                    var allPastWeeks = weeklyHistory.filter(function(w) { return !w.isCurrent; });
+                    var totalGoalsMet = allPastWeeks.filter(function(w) { return w.goalMet; }).length;
+                    var totalWeeks = allPastWeeks.length;
+                    var successRate = totalWeeks > 0 ? Math.round((totalGoalsMet / totalWeeks) * 100) : 0;
+
+                    return h('div', { className: "space-y-5 animate-in" },
+                        h('div', { className: "bg-white dark:bg-slate-800 p-5 rounded-2xl border dark:border-slate-700 shadow-sm" },
+                            h('h3', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 text-center" }, "Goal Achievement"),
+                            h('div', { className: "grid grid-cols-3 gap-3" },
+                                h('div', { className: "text-center" },
+                                    h('div', { className: "w-10 h-10 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mb-1" },
+                                        h(Icon, { name: "Check", className: "w-5 h-5 text-emerald-600" })
+                                    ),
+                                    h('p', { className: "text-lg font-black text-emerald-600" }, totalGoalsMet),
+                                    h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Goals Met")
+                                ),
+                                h('div', { className: "text-center" },
+                                    h('div', { className: "w-10 h-10 mx-auto rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center mb-1" },
+                                        h(Icon, { name: "X", className: "w-5 h-5 text-rose-500" })
+                                    ),
+                                    h('p', { className: "text-lg font-black text-rose-500" }, totalWeeks - totalGoalsMet),
+                                    h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Missed")
+                                ),
+                                h('div', { className: "text-center" },
+                                    h('div', { className: "w-10 h-10 mx-auto rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center mb-1" },
+                                        h(Icon, { name: "Target", className: "w-5 h-5 text-teal-600" })
+                                    ),
+                                    h('p', { className: "text-lg font-black text-teal-600" }, successRate + "%"),
+                                    h('p', { className: "text-[8px] font-bold text-slate-400 uppercase" }, "Success")
+                                )
+                            )
+                        ),
+                        h('div', { className: "bg-gradient-to-br from-teal-600 to-teal-700 p-4 rounded-2xl text-white" },
+                            h('div', { className: "flex items-center justify-between" },
+                                h('div', null,
+                                    h('p', { className: "text-[9px] font-bold opacity-70 uppercase" }, "Weekly Reading Goal"),
+                                    h('p', { className: "text-xl font-extrabold" }, profile.weeklyGoal + " minutes")
+                                ),
+                                h('div', { className: "bg-white/20 p-3 rounded-xl" },
+                                    h(Icon, { name: "Target", className: "w-6 h-6" })
+                                )
+                            )
+                        ),
+                        h('div', { className: "flex flex-col" },
+                            h('h3', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 mb-3" }, "Weekly Goal History"),
+                            h('div', { className: "space-y-3 overflow-y-auto max-h-52", style: { WebkitOverflowScrolling: 'touch' } },
+                                weeksByMonth.length > 0
+                                    ? weeksByMonth.map(function(monthData) {
+                                        return renderMonthGroup(monthData);
+                                    })
+                                    : h('p', { className: "text-center py-4 text-slate-300 dark:text-slate-600 text-xs italic" }, "No weekly history yet")
+                            )
+                        )
+                    );
+                }
+
+                function renderBooks() {
+                    return h('div', { className: "space-y-4 animate-in" },
+                        h('div', { className: "bg-gradient-to-r from-emerald-500 to-teal-600 p-4 rounded-2xl text-white shadow-lg" },
+                            h('div', { className: "flex items-center justify-between" },
+                                h('div', null,
+                                    h('p', { className: "text-[9px] font-bold opacity-70 uppercase" }, "Books Completed"),
+                                    h('p', { className: "text-2xl font-black" }, completedBooks.length)
+                                ),
+                                h('div', { className: "bg-white/20 p-3 rounded-xl" },
+                                    h(Icon, { name: "BookCheck", className: "w-6 h-6" })
+                                )
+                            )
+                        ),
+                        h('div', { className: "space-y-2.5" },
+                            h('h3', { className: "text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1" }, "My Completed Books"),
+                            completedBooks.length === 0
+                                ? h('div', { className: "bg-white dark:bg-slate-800 p-6 rounded-xl border dark:border-slate-700 text-center" },
+                                    h('span', { className: "text-3xl mb-2 block" }, "📚"),
+                                    h('p', { className: "text-sm font-bold text-slate-500 dark:text-slate-400" }, "No completed books yet"),
+                                    h('p', { className: "text-[10px] text-slate-400 mt-1" }, "Mark a book as finished when logging to add it here")
+                                )
+                                : completedBooks.map(function(book) {
+                                    var genre = GENRES.find(function(g) { return g.id === book.genre; }) || {};
+                                    return h('div', {
+                                        key: book.id,
+                                        className: "bg-white dark:bg-slate-800 p-4 rounded-xl border dark:border-slate-700 animate-in"
+                                    },
+                                        h('div', { className: "flex gap-3" },
+                                            h('div', { className: "w-12 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0" },
+                                                h(Icon, { name: "Book", className: "w-6 h-6 text-white" })
+                                            ),
+                                            h('div', { className: "flex-1 min-w-0" },
+                                                h('p', { className: "font-bold text-sm text-slate-800 dark:text-slate-200 truncate" }, book.title),
+                                                h('p', { className: "text-[10px] text-teal-600 dark:text-teal-400" }, genre.name || 'Unknown'),
+                                                h('p', { className: "text-[9px] text-slate-400 mt-0.5" }, "Completed: " + book.completedDate),
+                                                book.review
+                                                    ? h('div', { className: "mt-2 p-2 bg-slate-50 dark:bg-slate-700 rounded-lg" },
+                                                        h('p', { className: "text-[10px] text-slate-600 dark:text-slate-300 italic" }, '"' + book.review + '"')
+                                                    )
+                                                    : h('p', { className: "text-[9px] text-amber-500 mt-1" }, "No review yet")
+                                            ),
+                                            h('div', { className: "flex flex-col gap-1" },
+                                                h('button', {
+                                                    onClick: function() { setReviewModal(book); },
+                                                    className: "p-1.5 text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg"
+                                                },
+                                                    h(Icon, { name: "Edit3", className: "w-3.5 h-3.5" })
+                                                ),
+                                                h('button', {
+                                                    onClick: function() { deleteCompletedBook(book.id); },
+                                                    className: "p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg"
+                                                },
+                                                    h(Icon, { name: "Trash2", className: "w-3.5 h-3.5" })
+                                                )
+                                            )
+                                        )
+                                    );
+                                })
+                        )
+                    );
+                }
+
+                function renderReviewModal() {
+                    if (!reviewModal) return null;
+                    var reviewTextState = useState(reviewModal.review || '');
+                    var reviewText = reviewTextState[0];
+                    var setReviewText = reviewTextState[1];
+                    var wordCount = reviewText.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+
+                    return h('div', { className: "fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[150] flex items-center justify-center p-4" },
+                        h('div', { className: "bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 animate-in shadow-xl" },
+                            h('div', { className: "flex items-center justify-between" },
+                                h('div', null,
+                                    h('h3', { className: "font-bold text-sm text-slate-800 dark:text-slate-200" }, "Write a Review"),
+                                    h('p', { className: "text-[10px] text-slate-400" }, reviewModal.title)
+                                ),
+                                h('button', {
+                                    onClick: function() { setReviewModal(null); },
+                                    className: "p-1 text-slate-300"
+                                }, h(Icon, { name: "X" }))
+                            ),
+                            h('textarea', {
+                                className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200 resize-none",
+                                style: { fontSize: '16px', minHeight: '100px' },
+                                placeholder: "What did you think about this book? (50 words max)",
+                                value: reviewText,
+                                onChange: function(e) {
+                                    var words = e.target.value.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+                                    if (words.length <= 50) {
+                                        setReviewText(e.target.value);
+                                    }
+                                }
+                            }),
+                            h('div', { className: "flex justify-between items-center" },
+                                h('span', { className: "text-[10px] " + (wordCount >= 45 ? 'text-amber-500' : 'text-slate-400') },
+                                    wordCount + "/50 words"
+                                ),
+                                h('div', { className: "flex gap-2" },
+                                    h('button', {
+                                        onClick: function() { setReviewModal(null); },
+                                        className: "px-4 py-2 text-slate-500 text-xs font-bold uppercase"
+                                    }, "Cancel"),
+                                    h('button', {
+                                        onClick: function() { updateBookReview(reviewModal.id, reviewText); },
+                                        className: "px-4 py-2 bg-teal-600 text-white rounded-lg text-xs font-bold uppercase"
+                                    }, "Save")
+                                )
+                            )
+                        )
+                    );
+                }
+
+                function renderProfile() {
+                    return h('div', { className: "space-y-5 animate-in pb-4" },
+                        h('section', { className: "space-y-3" },
+                            h('h2', { className: "text-sm font-black px-1 uppercase tracking-wider text-slate-500 dark:text-slate-400" }, "Reader Profile"),
+                            h('div', { className: "bg-white dark:bg-slate-800 p-5 rounded-2xl border dark:border-slate-700 space-y-4 shadow-sm" },
+                                h('div', { className: "space-y-1" },
+                                    h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Name"),
+                                    h('input', {
+                                        className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 focus:ring-teal-600 text-slate-800 dark:text-slate-200",
+                                        style: { fontSize: '16px' },
+                                        value: profile.name,
+                                        onChange: function(e) { setProfile(Object.assign({}, profile, { name: e.target.value })); }
+                                    })
+                                ),
+                                h('div', { className: "grid grid-cols-2 gap-3" },
+                                    h('div', { className: "space-y-1" },
+                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Grade"),
+                                        h('select', {
+                                            className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                            style: { fontSize: '16px' },
+                                            value: profile.grade,
+                                            onChange: function(e) { setProfile(Object.assign({}, profile, { grade: e.target.value })); }
+                                        },
+                                            ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(function(g) {
+                                                return h('option', { key: g, value: g }, g);
+                                            })
+                                        )
+                                    ),
+                                    h('div', { className: "space-y-1" },
+                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Reading Level"),
+                                        h('select', {
+                                            className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                            style: { fontSize: '16px' },
+                                            value: profile.readingLevel,
+                                            onChange: function(e) { setProfile(Object.assign({}, profile, { readingLevel: e.target.value })); }
+                                        },
+                                            ['Beginner', 'Developing', 'Intermediate', 'Proficient', 'Advanced'].map(function(l) {
+                                                return h('option', { key: l, value: l }, l);
+                                            })
+                                        )
+                                    )
+                                ),
+                                h('div', { className: "space-y-1" },
+                                    h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Favorite Genre"),
+                                    h('select', {
+                                        className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                        style: { fontSize: '16px' },
+                                        value: profile.favoriteGenre,
+                                        onChange: function(e) { setProfile(Object.assign({}, profile, { favoriteGenre: e.target.value })); }
+                                    },
+                                        GENRES.map(function(g) {
+                                            return h('option', { key: g.id, value: g.id }, g.name);
+                                        })
+                                    )
+                                ),
+                                h('div', { className: "space-y-2 pt-1" },
+                                    h('div', { className: "flex justify-between items-center px-1" },
+                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase" }, "Weekly Goal"),
+                                        h('span', { className: "text-xs font-black text-teal-600" }, profile.weeklyGoal + " mins")
+                                    ),
+                                    h('input', {
+                                        type: "range", min: "30", max: "300", step: "15",
+                                        value: profile.weeklyGoal,
+                                        onChange: function(e) { setProfile(Object.assign({}, profile, { weeklyGoal: parseInt(e.target.value) })); },
+                                        className: "w-full"
+                                    })
+                                )
+                            )
+                        ),
+                        h('section', { className: "space-y-3" },
+                            h('h2', { className: "text-sm font-black px-1 uppercase tracking-wider text-slate-500 dark:text-slate-400" }, "App Settings"),
+                            h('div', { className: "bg-white dark:bg-slate-800 p-3 rounded-2xl border dark:border-slate-700 space-y-1 shadow-sm" },
+                                !isStandalone && h('button', {
+                                    onClick: handleInstallClick,
+                                    className: "w-full flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors text-teal-600"
+                                },
+                                    h('div', { className: "w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/50 flex items-center justify-center" },
+                                        h(Icon, { name: "Smartphone" })
+                                    ),
+                                    h('div', { className: "text-left flex-1" },
+                                        h('p', { className: "font-bold text-xs" }, "Install App"),
+                                        h('p', { className: "text-[9px] text-slate-400" }, "Add to home screen")
+                                    ),
+                                    h(Icon, { name: "Plus", className: "w-3 h-3" })
+                                ),
+                                h('button', {
+                                    onClick: exportData,
+                                    className: "w-full flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                                },
+                                    h('div', { className: "w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/50 text-teal-600 flex items-center justify-center" }, h(Icon, { name: "Download" })),
+                                    h('div', { className: "text-left flex-1" },
+                                        h('p', { className: "font-bold text-xs text-slate-700 dark:text-slate-300" }, "Export Data"),
+                                        h('p', { className: "text-[9px] text-slate-400" }, "Download reading log backup")
+                                    ),
+                                    h(Icon, { name: "ChevronRight", className: "text-slate-300 w-3 h-3" })
+                                ),
+                                h('button', {
+                                    onClick: function() { fileInputRef.current.click(); },
+                                    className: "w-full flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                                },
+                                    h('div', { className: "w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/50 text-amber-600 flex items-center justify-center" }, h(Icon, { name: "Upload" })),
+                                    h('div', { className: "text-left flex-1" },
+                                        h('p', { className: "font-bold text-xs text-slate-700 dark:text-slate-300" }, "Import Data"),
+                                        h('p', { className: "text-[9px] text-slate-400" }, "Restore from backup file")
+                                    ),
+                                    h(Icon, { name: "ChevronRight", className: "text-slate-300 w-3 h-3" })
+                                ),
+                                h('input', {
+                                    type: "file", ref: fileInputRef, onChange: importData, accept: ".json", className: "hidden"
+                                }),
+                                h('div', { className: "pt-2 px-1" },
+                                    h('button', {
+                                        onClick: resetAllData,
+                                        className: "w-full p-2.5 text-rose-500 rounded-xl font-bold text-[10px] uppercase hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors border border-rose-100 dark:border-rose-900"
+                                    }, "Clear All Reading History")
+                                )
+                            )
+                        ),
+                        h('p', { className: "text-center text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase pb-6" }, "Reading Log v2.0")
+                    );
+                }
+
+                function renderAddModal() {
+                    if (!showAddModal) return null;
+                    return h('div', { className: "fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[100] flex items-end sm:items-center justify-center p-4" },
+                        h('div', { className: "bg-white dark:bg-slate-800 w-full max-sm:rounded-t-3xl sm:rounded-3xl p-6 space-y-4 animate-in max-h-[85vh] overflow-y-auto" },
+                            h('div', { className: "flex justify-between items-center" },
+                                h('h2', { className: "text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400" }, "Log Reading"),
+                                h('button', { onClick: function() { setShowAddModal(false); }, className: "p-1 text-slate-300" }, h(Icon, { name: "X" }))
+                            ),
+                            h('div', { className: "space-y-1" },
+                                h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Book Title"),
+                                h('input', {
+                                    type: "text",
+                                    className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                    style: { fontSize: '16px' },
+                                    placeholder: "What are you reading?",
+                                    value: newLog.bookTitle,
+                                    onChange: function(e) { setNewLog(Object.assign({}, newLog, { bookTitle: e.target.value })); }
+                                }),
+                                // Quick book selection
+                                recentBooks.length > 0 && h('div', { className: "flex flex-wrap gap-1.5 mt-2" },
+                                    h('span', { className: "text-[8px] text-slate-400 mr-1" }, "Recent:"),
+                                    recentBooks.map(function(book, idx) {
+                                        return h('button', {
+                                            key: idx,
+                                            type: "button",
+                                            onClick: function() {
+                                                setNewLog(Object.assign({}, newLog, { bookTitle: book.title, genre: book.genre }));
+                                            },
+                                            className: "px-2 py-0.5 text-[9px] font-bold rounded-full transition-all " +
+                                                (newLog.bookTitle === book.title
+                                                    ? 'bg-teal-600 text-white'
+                                                    : 'bg-slate-100 dark:bg-slate-600 text-slate-500 dark:text-slate-300 hover:bg-teal-100 dark:hover:bg-teal-900/30')
+                                        }, book.title.length > 15 ? book.title.substring(0, 15) + '...' : book.title);
+                                    })
+                                )
+                            ),
+                            h('div', { className: "space-y-1" },
+                                h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Reading Type"),
+                                h('div', { className: "grid grid-cols-3 gap-2" },
+                                    READING_TYPES.map(function(t) {
+                                        return h('button', {
+                                            key: t.id,
+                                            onClick: function() { setNewLog(Object.assign({}, newLog, { type: t.id })); },
+                                            className: "p-2 rounded-xl border dark:border-slate-600 flex flex-col items-center gap-1 transition-all " +
+                                                (newLog.type === t.id ? 'border-teal-600 bg-teal-50 dark:bg-teal-900/30 text-teal-600' : 'border-slate-100 bg-slate-50 dark:bg-slate-700 text-slate-400')
+                                        },
+                                            h('span', { className: "text-base" }, t.icon),
+                                            h('span', { className: "text-[8px] font-bold uppercase" }, t.name)
+                                        );
+                                    })
+                                )
+                            ),
+                            h('div', { className: "space-y-1" },
+                                h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Genre"),
+                                h('select', {
+                                    className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                    style: { fontSize: '16px' },
+                                    value: newLog.genre,
+                                    onChange: function(e) { setNewLog(Object.assign({}, newLog, { genre: e.target.value })); }
+                                },
+                                    GENRES.map(function(g) {
+                                        return h('option', { key: g.id, value: g.id }, g.name);
+                                    })
+                                )
+                            ),
+                            h('div', { className: "space-y-3" },
+                                h('div', { className: "space-y-1" },
+                                    h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Date"),
+                                    h('input', {
+                                        type: "date",
+                                        className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                        style: { fontSize: '16px' },
+                                        value: newLog.date,
+                                        onChange: function(e) { setNewLog(Object.assign({}, newLog, { date: e.target.value })); }
+                                    })
+                                ),
+                                h('div', { className: "grid grid-cols-2 gap-3" },
+                                    h('div', { className: "space-y-1" },
+                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Minutes Read *"),
+                                        h('input', {
+                                            type: "number",
+                                            className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                            style: { fontSize: '16px' },
+                                            placeholder: "0",
+                                            value: newLog.duration,
+                                            onChange: function(e) { setNewLog(Object.assign({}, newLog, { duration: e.target.value })); }
+                                        })
+                                    ),
+                                    h('div', { className: "space-y-1" },
+                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Pages (optional)"),
+                                        h('input', {
+                                            type: "number",
+                                            className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
+                                            style: { fontSize: '16px' },
+                                            placeholder: "0",
+                                            value: newLog.pages,
+                                            onChange: function(e) { setNewLog(Object.assign({}, newLog, { pages: e.target.value })); }
+                                        })
+                                    )
+                                ),
+                                h('div', { className: "space-y-1" },
+                                    h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Difficulty Level"),
+                                    h('div', { className: "grid grid-cols-3 gap-2" },
+                                        DIFFICULTY_LEVELS.map(function(d) {
+                                            return h('button', {
+                                                key: d.id,
+                                                onClick: function() { setNewLog(Object.assign({}, newLog, { difficulty: d.id })); },
+                                                className: "p-2.5 rounded-xl border dark:border-slate-600 text-center transition-all " +
+                                                    (newLog.difficulty === d.id ? 'border-teal-600 bg-teal-50 dark:bg-teal-900/30 text-teal-600' : 'border-slate-100 bg-slate-50 dark:bg-slate-700 text-slate-400')
+                                            },
+                                                h('span', { className: "text-[10px] font-bold uppercase" }, d.name)
+                                            );
+                                        })
+                                    )
+                                ),
+                                // Completed toggle
+                                h('button', {
+                                    type: "button",
+                                    onClick: function() { setNewLog(Object.assign({}, newLog, { completed: !newLog.completed })); },
+                                    className: "w-full p-3 rounded-xl border transition-all flex items-center justify-between " +
+                                        (newLog.completed
+                                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+                                            : 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700')
+                                },
+                                    h('div', { className: "flex items-center gap-2" },
+                                        h('span', { className: "text-lg" }, newLog.completed ? '✅' : '📖'),
+                                        h('div', { className: "text-left" },
+                                            h('p', { className: "text-xs font-bold " + (newLog.completed ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300') },
+                                                newLog.completed ? "Book Completed!" : "Finished this book?"
+                                            ),
+                                            h('p', { className: "text-[9px] text-slate-400" },
+                                                newLog.completed ? "Will be added to My Books" : "Tap to mark as finished"
+                                            )
+                                        )
+                                    ),
+                                    h('div', {
+                                        className: "w-10 h-6 rounded-full transition-all relative " +
+                                            (newLog.completed ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600')
+                                    },
+                                        h('div', {
+                                            className: "absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all " +
+                                                (newLog.completed ? 'left-5' : 'left-1')
+                                        })
+                                    )
+                                )
+                            ),
+                            h('button', {
+                                onClick: addLog,
+                                className: "w-full bg-teal-600 text-white p-3.5 rounded-xl font-black shadow-lg uppercase text-[11px] tracking-widest mt-2 active:scale-95 transition-transform"
+                            }, "Save Reading")
+                        )
+                    );
+                }
+
+                return h('div', { className: "min-h-screen bg-amber-50 dark:bg-slate-900 flex flex-col max-w-md mx-auto relative overflow-x-hidden" },
+                    h('header', { className: "bg-white dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-3 sticky top-0 z-50 flex items-center justify-between flex-shrink-0" },
+                        h('div', { className: "flex items-center gap-2" },
+                            h('span', { className: "text-xl" }, "📚"),
+                            h('h1', { className: "font-extrabold text-teal-600 text-sm tracking-tight" }, "MY READING LOG")
+                        ),
+                        statusMsg && h('span', { className: "text-[9px] font-bold uppercase text-teal-600 animate-pulse text-right max-w-[150px] leading-tight" }, statusMsg)
+                    ),
+                    // Install banner
+                    showInstallBanner && !isStandalone && h('div', { className: "m-4 mb-0 bg-gradient-to-r from-teal-600 to-teal-500 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg animate-in flex-shrink-0" },
+                        h('div', { className: "flex items-center gap-3" },
+                            h('div', { className: "bg-white/20 p-2 rounded-xl" },
+                                h(Icon, { name: "Smartphone", className: "w-5 h-5" })
+                            ),
+                            h('div', null,
+                                h('p', { className: "font-bold text-xs" }, "Install Reading Log"),
+                                h('p', { className: "text-[10px] opacity-80" }, "Add to home screen for quick access")
+                            )
+                        ),
+                        h('div', { className: "flex gap-2" },
+                            h('button', {
+                                onClick: function() { setShowInstallBanner(false); },
+                                className: "px-3 py-1.5 text-[10px] font-bold uppercase opacity-80 hover:opacity-100"
+                            }, "Later"),
+                            h('button', {
+                                onClick: handleInstallClick,
+                                className: "bg-white text-teal-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase"
+                            }, "Install")
+                        )
+                    ),
+                    h('main', { className: "main-content flex-1 p-4 space-y-5 pb-28" },
+                        activeTab === 'dashboard' && renderDashboard(),
+                        activeTab === 'history' && renderHistory(),
+                        activeTab === 'books' && renderBooks(),
+                        activeTab === 'analysis' && renderAnalysis(),
+                        activeTab === 'goals' && renderGoals(),
+                        activeTab === 'profile' && renderProfile()
+                    ),
+                    h('nav', {
+                        className: "fixed bottom-5 left-4 right-4 max-w-md mx-auto bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border dark:border-slate-700 rounded-2xl px-1 py-1.5 flex items-center shadow-lg z-[60]",
+                        style: { marginBottom: 'env(safe-area-inset-bottom)' }
+                    },
+                        h('div', { className: "flex-1 flex justify-evenly" },
+                            h(NavBtn, { active: activeTab === 'dashboard', onClick: function() { setActiveTab('dashboard'); }, icon: "Home" }),
+                            h(NavBtn, { active: activeTab === 'history', onClick: function() { setActiveTab('history'); }, icon: "Calendar" }),
+                            h(NavBtn, { active: activeTab === 'books', onClick: function() { setActiveTab('books'); }, icon: "Library" })
+                        ),
+                        h('button', {
+                            onClick: function() { setShowAddModal(true); },
+                            className: "bg-teal-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md active:scale-90 transition-all mx-1 flex-shrink-0"
+                        }, h(Icon, { name: "Plus", className: "w-5 h-5" })),
+                        h('div', { className: "flex-1 flex justify-evenly" },
+                            h(NavBtn, { active: activeTab === 'analysis', onClick: function() { setActiveTab('analysis'); }, icon: "BarChart3" }),
+                            h(NavBtn, { active: activeTab === 'goals', onClick: function() { setActiveTab('goals'); }, icon: "Target" }),
+                            h(NavBtn, { active: activeTab === 'profile', onClick: function() { setActiveTab('profile'); }, icon: "User" })
+                        )
+                    ),
+                    renderAddModal(),
+                    renderReviewModal(),
+                    confirmDialog && h(ConfirmDialog, {
+                        message: confirmDialog.message,
+                        onConfirm: confirmDialog.onConfirm,
+                        onCancel: confirmDialog.onCancel
+                    }),
+                    showSplash && h('div', {
+                        className: "fixed inset-0 z-[300] flex flex-col items-center justify-center bg-amber-50 dark:bg-slate-900"
+                    },
+                        h('span', { className: "text-6xl mb-4" }, "📚"),
+                        h('h1', { className: "text-xl font-extrabold text-teal-600 tracking-tight text-center" }, "MY READING LOG"),
+                        h('p', { className: "text-xs text-slate-500 dark:text-slate-400 mt-2 italic" }, "Track your reading journey"),
+                        h('p', { className: "text-[10px] text-slate-400 dark:text-slate-500 mt-4 uppercase tracking-widest" }, "Loading...")
+                    )
+                );
+            }
+
+            var root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(h(App));
+        })();
+    </script>
+</body>
+</html>
