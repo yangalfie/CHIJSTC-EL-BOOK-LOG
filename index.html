@@ -276,7 +276,7 @@
                 var setLogs = logsState[1];
 
                 var profileState = useState(function() {
-                    return JSON.parse(safeStorage.getItem(STORAGE_KEY_PROFILE) || '{"name":"Student Reader","grade":"5","readingLevel":"Intermediate","favoriteGenre":"fantasy","weeklyGoal":150}');
+                    return JSON.parse(safeStorage.getItem(STORAGE_KEY_PROFILE) || '{"name":"Student Reader","grade":"Secondary 1","readingLevel":"Intermediate","favoriteGenre":"fantasy","weeklyGoal":150}');
                 });
                 var profile = profileState[0];
                 var setProfile = profileState[1];
@@ -325,6 +325,14 @@
                 var reviewModalState = useState(null);
                 var reviewModal = reviewModalState[0];
                 var setReviewModal = reviewModalState[1];
+
+                // Review form state (must be at top level)
+                var reviewTextState = useState('');
+                var reviewText = reviewTextState[0];
+                var setReviewText = reviewTextState[1];
+                var reviewRatingState = useState(0);
+                var reviewRating = reviewRatingState[0];
+                var setReviewRating = reviewRatingState[1];
 
                 var fileInputRef = useRef(null);
 
@@ -476,14 +484,27 @@
                     setNewLog(Object.assign({}, newLog, { duration: '', pages: '', bookTitle: '', completed: false }));
                 }
 
-                function updateBookReview(bookId, review) {
+                function openReviewModal(book) {
+                    setReviewText(book.review || '');
+                    setReviewRating(book.rating || 0);
+                    setReviewModal(book);
+                }
+
+                function closeReviewModal() {
+                    setReviewModal(null);
+                    setReviewText('');
+                    setReviewRating(0);
+                }
+
+                function saveBookReview() {
+                    if (!reviewModal) return;
                     setCompletedBooks(completedBooks.map(function(b) {
-                        if (b.id === bookId) {
-                            return Object.assign({}, b, { review: review });
+                        if (b.id === reviewModal.id) {
+                            return Object.assign({}, b, { review: reviewText, rating: reviewRating });
                         }
                         return b;
                     }));
-                    setReviewModal(null);
+                    closeReviewModal();
                     notify('Review saved!');
                 }
 
@@ -802,7 +823,7 @@
                                     h('p', { className: "text-[9px] font-bold opacity-70 uppercase tracking-widest mb-0.5" }, "Welcome Back"),
                                     h('h2', { className: "text-xl font-extrabold" }, profile.name),
                                     h('div', { className: "flex gap-2 mt-3" },
-                                        h('div', { className: "bg-white/10 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider" }, "Grade " + profile.grade),
+                                        h('div', { className: "bg-white/10 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider" }, profile.grade),
                                         h('div', { className: "bg-white/10 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider" }, profile.readingLevel)
                                     )
                                 ),
@@ -1216,37 +1237,59 @@
                                 )
                                 : completedBooks.map(function(book) {
                                     var genre = GENRES.find(function(g) { return g.id === book.genre; }) || {};
+                                    var hasReview = book.review || book.rating;
                                     return h('div', {
                                         key: book.id,
-                                        className: "bg-white dark:bg-slate-800 p-4 rounded-xl border dark:border-slate-700 animate-in"
+                                        className: "bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 animate-in overflow-hidden"
                                     },
-                                        h('div', { className: "flex gap-3" },
-                                            h('div', { className: "w-12 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0" },
-                                                h(Icon, { name: "Book", className: "w-6 h-6 text-white" })
-                                            ),
-                                            h('div', { className: "flex-1 min-w-0" },
-                                                h('p', { className: "font-bold text-sm text-slate-800 dark:text-slate-200 truncate" }, book.title),
-                                                h('p', { className: "text-[10px] text-teal-600 dark:text-teal-400" }, genre.name || 'Unknown'),
-                                                h('p', { className: "text-[9px] text-slate-400 mt-0.5" }, "Completed: " + book.completedDate),
-                                                book.review
-                                                    ? h('div', { className: "mt-2 p-2 bg-slate-50 dark:bg-slate-700 rounded-lg" },
-                                                        h('p', { className: "text-[10px] text-slate-600 dark:text-slate-300 italic" }, '"' + book.review + '"')
-                                                    )
-                                                    : h('p', { className: "text-[9px] text-amber-500 mt-1" }, "No review yet")
-                                            ),
-                                            h('div', { className: "flex flex-col gap-1" },
-                                                h('button', {
-                                                    onClick: function() { setReviewModal(book); },
-                                                    className: "p-1.5 text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg"
-                                                },
-                                                    h(Icon, { name: "Edit3", className: "w-3.5 h-3.5" })
+                                        // Main tappable area
+                                        h('button', {
+                                            onClick: function() { openReviewModal(book); },
+                                            className: "w-full p-4 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                        },
+                                            h('div', { className: "flex gap-3" },
+                                                h('div', { className: "w-12 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0" },
+                                                    h(Icon, { name: "Book", className: "w-6 h-6 text-white" })
                                                 ),
-                                                h('button', {
-                                                    onClick: function() { deleteCompletedBook(book.id); },
-                                                    className: "p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg"
-                                                },
-                                                    h(Icon, { name: "Trash2", className: "w-3.5 h-3.5" })
+                                                h('div', { className: "flex-1 min-w-0" },
+                                                    h('p', { className: "font-bold text-sm text-slate-800 dark:text-slate-200 truncate" }, book.title),
+                                                    h('p', { className: "text-[10px] text-teal-600 dark:text-teal-400" }, genre.name || 'Unknown'),
+                                                    // Star rating display
+                                                    book.rating ? h('div', { className: "flex items-center gap-0.5 mt-1" },
+                                                        [1, 2, 3, 4, 5].map(function(star) {
+                                                            return h('svg', {
+                                                                key: star,
+                                                                xmlns: "http://www.w3.org/2000/svg",
+                                                                viewBox: "0 0 24 24",
+                                                                fill: star <= book.rating ? "#f59e0b" : "none",
+                                                                stroke: star <= book.rating ? "#f59e0b" : "#e2e8f0",
+                                                                strokeWidth: "2",
+                                                                className: "w-3.5 h-3.5"
+                                                            },
+                                                                h('polygon', { points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" })
+                                                            );
+                                                        })
+                                                    ) : null,
+                                                    h('p', { className: "text-[9px] text-slate-400 mt-0.5" }, "Completed: " + book.completedDate),
+                                                    book.review
+                                                        ? h('div', { className: "mt-2 p-2 bg-slate-50 dark:bg-slate-600 rounded-lg" },
+                                                            h('p', { className: "text-[10px] text-slate-600 dark:text-slate-300 italic line-clamp-2" }, '"' + book.review + '"')
+                                                        )
+                                                        : h('p', { className: "text-[9px] text-amber-500 mt-1 flex items-center gap-1" },
+                                                            h(Icon, { name: "Star", className: "w-3 h-3" }),
+                                                            "Tap to add review"
+                                                        )
                                                 )
+                                            )
+                                        ),
+                                        // Delete button row
+                                        h('div', { className: "px-4 py-2 border-t dark:border-slate-700 flex justify-end" },
+                                            h('button', {
+                                                onClick: function(e) { e.stopPropagation(); deleteCompletedBook(book.id); },
+                                                className: "text-[9px] text-slate-400 hover:text-rose-500 font-bold uppercase flex items-center gap-1"
+                                            },
+                                                h(Icon, { name: "Trash2", className: "w-3 h-3" }),
+                                                "Remove"
                                             )
                                         )
                                     );
@@ -1257,9 +1300,6 @@
 
                 function renderReviewModal() {
                     if (!reviewModal) return null;
-                    var reviewTextState = useState(reviewModal.review || '');
-                    var reviewText = reviewTextState[0];
-                    var setReviewText = reviewTextState[1];
                     var wordCount = reviewText.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
 
                     return h('div', { className: "fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[150] flex items-center justify-center p-4" },
@@ -1270,36 +1310,70 @@
                                     h('p', { className: "text-[10px] text-slate-400" }, reviewModal.title)
                                 ),
                                 h('button', {
-                                    onClick: function() { setReviewModal(null); },
+                                    onClick: closeReviewModal,
                                     className: "p-1 text-slate-300"
                                 }, h(Icon, { name: "X" }))
                             ),
-                            h('textarea', {
-                                className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200 resize-none",
-                                style: { fontSize: '16px', minHeight: '100px' },
-                                placeholder: "What did you think about this book? (50 words max)",
-                                value: reviewText,
-                                onChange: function(e) {
-                                    var words = e.target.value.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
-                                    if (words.length <= 50) {
-                                        setReviewText(e.target.value);
-                                    }
-                                }
-                            }),
-                            h('div', { className: "flex justify-between items-center" },
-                                h('span', { className: "text-[10px] " + (wordCount >= 45 ? 'text-amber-500' : 'text-slate-400') },
-                                    wordCount + "/50 words"
+                            // Star Rating
+                            h('div', { className: "text-center py-2" },
+                                h('p', { className: "text-[10px] font-bold text-slate-400 uppercase mb-2" }, "Your Rating"),
+                                h('div', { className: "flex justify-center gap-1" },
+                                    [1, 2, 3, 4, 5].map(function(star) {
+                                        return h('button', {
+                                            key: star,
+                                            type: "button",
+                                            onClick: function() { setReviewRating(star); },
+                                            className: "p-1 transition-transform hover:scale-110 active:scale-95"
+                                        },
+                                            h('svg', {
+                                                xmlns: "http://www.w3.org/2000/svg",
+                                                viewBox: "0 0 24 24",
+                                                fill: star <= reviewRating ? "#f59e0b" : "none",
+                                                stroke: star <= reviewRating ? "#f59e0b" : "#cbd5e1",
+                                                strokeWidth: "2",
+                                                className: "w-8 h-8"
+                                            },
+                                                h('polygon', { points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" })
+                                            )
+                                        );
+                                    })
                                 ),
-                                h('div', { className: "flex gap-2" },
-                                    h('button', {
-                                        onClick: function() { setReviewModal(null); },
-                                        className: "px-4 py-2 text-slate-500 text-xs font-bold uppercase"
-                                    }, "Cancel"),
-                                    h('button', {
-                                        onClick: function() { updateBookReview(reviewModal.id, reviewText); },
-                                        className: "px-4 py-2 bg-teal-600 text-white rounded-lg text-xs font-bold uppercase"
-                                    }, "Save")
+                                reviewRating > 0 && h('p', { className: "text-xs text-amber-500 font-bold mt-1" },
+                                    reviewRating === 1 ? "Not for me" :
+                                    reviewRating === 2 ? "It was okay" :
+                                    reviewRating === 3 ? "Good read" :
+                                    reviewRating === 4 ? "Really enjoyed it!" :
+                                    "Absolutely loved it!"
                                 )
+                            ),
+                            // Review text
+                            h('div', { className: "space-y-1" },
+                                h('label', { className: "text-[10px] font-bold text-slate-400 uppercase" }, "Your thoughts (optional)"),
+                                h('textarea', {
+                                    className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200 resize-none",
+                                    style: { fontSize: '16px', minHeight: '80px' },
+                                    placeholder: "What did you think about this book?",
+                                    value: reviewText,
+                                    onChange: function(e) {
+                                        var words = e.target.value.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+                                        if (words.length <= 50) {
+                                            setReviewText(e.target.value);
+                                        }
+                                    }
+                                }),
+                                h('p', { className: "text-[9px] text-right " + (wordCount >= 45 ? 'text-amber-500' : 'text-slate-400') },
+                                    wordCount + "/50 words"
+                                )
+                            ),
+                            h('div', { className: "flex gap-2 pt-2" },
+                                h('button', {
+                                    onClick: closeReviewModal,
+                                    className: "flex-1 px-4 py-2.5 text-slate-500 text-xs font-bold uppercase rounded-xl bg-slate-100 dark:bg-slate-700"
+                                }, "Cancel"),
+                                h('button', {
+                                    onClick: saveBookReview,
+                                    className: "flex-1 px-4 py-2.5 bg-teal-600 text-white rounded-xl text-xs font-bold uppercase"
+                                }, "Save Review")
                             )
                         )
                     );
@@ -1353,14 +1427,14 @@
                                 ),
                                 h('div', { className: "grid grid-cols-2 gap-3" },
                                     h('div', { className: "space-y-1" },
-                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Grade"),
+                                        h('label', { className: "text-[9px] font-bold text-slate-400 uppercase ml-1" }, "Level"),
                                         h('select', {
                                             className: "w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs font-bold border-none ring-1 ring-slate-100 dark:ring-slate-600 text-slate-800 dark:text-slate-200",
                                             style: { fontSize: '16px' },
                                             value: profile.grade,
                                             onChange: function(e) { setProfile(Object.assign({}, profile, { grade: e.target.value })); }
                                         },
-                                            ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(function(g) {
+                                            ['Secondary 1', 'Secondary 2', 'Secondary 3', 'Secondary 4', 'Secondary 5'].map(function(g) {
                                                 return h('option', { key: g, value: g }, g);
                                             })
                                         )
